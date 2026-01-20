@@ -1,21 +1,26 @@
-const CACHE_NAME = 'ai-offline-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com'
-];
+const CACHE = "offline-ai-v3";
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+self.addEventListener("install", (e) => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c =>
+      c.addAll([
+        "./",
+        "./index.html",
+        "./app.js",
+        "./tailwind.css",
+        "./webllm.bundle.js",
+        "./manifest.json"
+      ])
+    )
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+self.addEventListener("activate", () => self.clients.claim());
+
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
